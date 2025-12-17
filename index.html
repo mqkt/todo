@@ -5,56 +5,321 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ToDo</title>
   <style>
-    :root { color-scheme: light dark; }
-    body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; margin: 0; }
-    .wrap { max-width: 820px; margin: 32px auto; padding: 0 16px; }
-    header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
-    h1 { font-size: 24px; margin: 0; }
-    .muted { opacity: .7; font-size: 13px; }
+    :root{
+      color-scheme: dark;
 
-    .card { border: 1px solid rgba(127,127,127,.25); border-radius: 16px; padding: 16px; box-shadow: 0 4px 18px rgba(0,0,0,.06); }
-    form { display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-top: 12px; }
-    input[type="text"] { padding: 12px 12px; border-radius: 12px; border: 1px solid rgba(127,127,127,.35); outline: none; }
-    input[type="text"]:focus { border-color: rgba(127,127,127,.8); }
-    button { padding: 10px 12px; border-radius: 12px; border: 1px solid rgba(127,127,127,.35); background: transparent; cursor: pointer; }
-    button:hover { background: rgba(127,127,127,.08); }
-    button:disabled { opacity: .5; cursor: not-allowed; }
+      /* Premium dark palette */
+      --bg0:#07080b;
+      --bg1:#0b0f18;
+      --surface: rgba(255,255,255,.06);
+      --surface2: rgba(255,255,255,.04);
+      --border: rgba(255,255,255,.10);
+      --border2: rgba(255,255,255,.16);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.62);
 
-    .bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin: 14px 0 6px; }
-    .left, .right { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-    .seg { display: inline-flex; border: 1px solid rgba(127,127,127,.35); border-radius: 999px; overflow: hidden; }
-    .seg button { border: 0; border-radius: 0; padding: 8px 10px; }
-    .seg button.active { background: rgba(127,127,127,.18); }
-    .search { min-width: 220px; flex: 1; max-width: 360px; }
+      /* “Gold” accent (控えめ) */
+      --accent: #d6b56a;
+      --accent2: rgba(214,181,106,.22);
 
-    ul { list-style: none; padding: 0; margin: 10px 0 0; }
-    li { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center;
-         padding: 10px 10px; border-radius: 12px; border: 1px solid rgba(127,127,127,.18); margin-bottom: 8px; }
-    li.done { opacity: .7; }
-    .text { user-select: none; }
-    .text.done { text-decoration: line-through; }
-    .actions { display: inline-flex; gap: 6px; }
-    .icon { font-size: 14px; padding: 8px 10px; }
+      --radius: 18px;
+      --radius2: 26px;
+    }
 
-    .editbox { width: 100%; padding: 10px 10px; border-radius: 10px; border: 1px solid rgba(127,127,127,.35); }
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 800px at 15% 10%, rgba(214,181,106,.10), transparent 55%),
+        radial-gradient(1000px 700px at 85% 20%, rgba(120,170,255,.08), transparent 60%),
+        radial-gradient(900px 600px at 50% 95%, rgba(255,255,255,.06), transparent 55%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+    }
 
-    .empty { padding: 18px; text-align: center; opacity: .7; border: 1px dashed rgba(127,127,127,.35); border-radius: 12px; }
-    footer { margin-top: 14px; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
-    .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; border: 1px solid rgba(127,127,127,.35); border-bottom-width: 2px; padding: 2px 6px; border-radius: 8px; font-size: 12px; opacity: .8; }
+    /* subtle “noise” */
+    body::before{
+      content:"";
+      position:fixed; inset:0;
+      pointer-events:none;
+      opacity:.06;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.45'/%3E%3C/svg%3E");
+      mix-blend-mode:overlay;
+    }
+
+    .wrap{
+      max-width: 920px;
+      margin: 44px auto;
+      padding: 0 18px 40px;
+    }
+
+    header{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom: 14px;
+    }
+
+    h1{
+      margin:0;
+      font-size: 28px;
+      letter-spacing: .02em;
+      font-weight: 650;
+    }
+    .sub{
+      color:var(--muted);
+      font-size: 13px;
+      letter-spacing: .02em;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:flex-end;
+      flex-wrap:wrap;
+    }
+    .chip{
+      border:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      padding: 6px 10px;
+      border-radius: 999px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 30px rgba(0,0,0,.18);
+      white-space:nowrap;
+    }
+    .chip b{ color: var(--accent); font-weight:700; }
+
+    .card{
+      border: 1px solid var(--border);
+      border-radius: var(--radius2);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+      backdrop-filter: blur(14px);
+      box-shadow:
+        0 18px 60px rgba(0,0,0,.35),
+        inset 0 1px 0 rgba(255,255,255,.06);
+      overflow:hidden;
+    }
+
+    .topbar{
+      padding: 18px 18px 0;
+    }
+
+    form{
+      display:grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      margin: 8px 0 14px;
+    }
+
+    input[type="text"]{
+      width:100%;
+      padding: 13px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,.18);
+      color:var(--text);
+      outline:none;
+      transition: border-color .18s ease, box-shadow .18s ease, transform .12s ease;
+    }
+    input[type="text"]::placeholder{ color: rgba(255,255,255,.42); }
+    input[type="text"]:focus{
+      border-color: var(--border2);
+      box-shadow: 0 0 0 4px rgba(214,181,106,.14);
+    }
+
+    .btn{
+      padding: 11px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.03));
+      color:var(--text);
+      cursor:pointer;
+      transition: transform .12s ease, background .18s ease, border-color .18s ease, box-shadow .18s ease, opacity .18s ease;
+      box-shadow: 0 10px 24px rgba(0,0,0,.24);
+      user-select:none;
+    }
+    .btn:hover{
+      transform: translateY(-1px);
+      border-color: var(--border2);
+      background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.05));
+    }
+    .btn:active{ transform: translateY(0); opacity:.92; }
+    .btn:disabled{ opacity:.45; cursor:not-allowed; transform:none; }
+
+    .btn.primary{
+      border-color: rgba(214,181,106,.35);
+      background: linear-gradient(180deg, rgba(214,181,106,.22), rgba(255,255,255,.02));
+      box-shadow: 0 14px 34px rgba(214,181,106,.10), 0 18px 60px rgba(0,0,0,.28);
+    }
+    .btn.primary:hover{
+      box-shadow: 0 18px 46px rgba(214,181,106,.14), 0 22px 70px rgba(0,0,0,.30);
+    }
+
+    .bar{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding: 0 18px 14px;
+    }
+    .left, .right{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+    }
+
+    .seg{
+      display:inline-flex;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      overflow:hidden;
+      background: rgba(0,0,0,.14);
+    }
+    .seg button{
+      border:0;
+      background: transparent;
+      color: var(--muted);
+      padding: 9px 12px;
+      cursor:pointer;
+      transition: background .18s ease, color .18s ease;
+    }
+    .seg button.active{
+      color: var(--text);
+      background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.04));
+    }
+    .seg button:hover{ color: var(--text); }
+
+    .search{
+      min-width: 220px;
+      max-width: 360px;
+    }
+
+    .listWrap{ padding: 0 18px 16px; }
+
+    ul{ list-style:none; padding:0; margin:0; }
+    li{
+      display:grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 12px;
+      align-items:center;
+      padding: 12px 12px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(255,255,255,.10);
+      background: linear-gradient(180deg, rgba(0,0,0,.18), rgba(255,255,255,.02));
+      box-shadow: 0 10px 26px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.05);
+      margin-bottom: 10px;
+      transition: transform .12s ease, border-color .18s ease, background .18s ease;
+    }
+    li:hover{
+      transform: translateY(-1px);
+      border-color: rgba(255,255,255,.16);
+      background: linear-gradient(180deg, rgba(0,0,0,.14), rgba(255,255,255,.03));
+    }
+    li.done{ opacity: .72; }
+
+    input[type="checkbox"]{
+      width: 18px; height: 18px;
+      accent-color: var(--accent);
+      cursor:pointer;
+    }
+
+    .text{
+      user-select:none;
+      line-height: 1.45;
+      letter-spacing: .01em;
+    }
+    .text.done{
+      text-decoration: line-through;
+      text-decoration-color: rgba(214,181,106,.55);
+      color: rgba(255,255,255,.70);
+    }
+
+    .actions{ display:inline-flex; gap:8px; }
+    .icon{
+      padding: 9px 11px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.12);
+      color: var(--text);
+      cursor:pointer;
+      transition: transform .12s ease, background .18s ease, border-color .18s ease;
+    }
+    .icon:hover{
+      transform: translateY(-1px);
+      border-color: rgba(255,255,255,.18);
+      background: rgba(255,255,255,.06);
+    }
+
+    .editbox{
+      width:100%;
+      padding: 11px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,.18);
+      color: var(--text);
+      outline:none;
+    }
+    .editbox:focus{ box-shadow: 0 0 0 4px rgba(214,181,106,.14); border-color: var(--border2); }
+
+    .empty{
+      padding: 18px;
+      text-align:center;
+      color: var(--muted);
+      border: 1px dashed rgba(255,255,255,.18);
+      border-radius: var(--radius);
+      background: rgba(0,0,0,.10);
+    }
+
+    footer{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      padding: 0 18px 18px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .kbd{
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(0,0,0,.14);
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-size: 12px;
+      color: rgba(255,255,255,.78);
+    }
+
+    /* small screens */
+    @media (max-width: 560px){
+      header{ align-items:flex-start; flex-direction:column; }
+      form{ grid-template-columns: 1fr; }
+      .right{ width:100%; justify-content:flex-end; }
+      .search{ max-width: 100%; }
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
     <header>
       <h1>ToDo</h1>
-      <div class="muted" id="statTop"></div>
+      <div class="sub">
+        <span class="chip">Total <b id="tTotal">0</b></span>
+        <span class="chip">Active <b id="tActive">0</b></span>
+        <span class="chip">Done <b id="tDone">0</b></span>
+      </div>
     </header>
 
     <div class="card">
-      <form id="addForm">
-        <input id="newTodo" type="text" placeholder="やることを追加（例：AtCoder A問題を1問）" autocomplete="off" />
-        <button id="addBtn" type="submit">追加</button>
-      </form>
+      <div class="topbar">
+        <form id="addForm">
+          <input id="newTodo" type="text" placeholder="やることを追加（例：AtCoder A問題を1問）" autocomplete="off" />
+          <button class="btn primary" id="addBtn" type="submit">追加</button>
+        </form>
+      </div>
 
       <div class="bar">
         <div class="left">
@@ -65,17 +330,18 @@
           </div>
           <input class="search" id="search" type="text" placeholder="検索（入力で絞り込み）" autocomplete="off" />
         </div>
-
         <div class="right">
-          <button type="button" id="clearDoneBtn">完了をまとめて削除</button>
-          <button type="button" id="clearAllBtn">全削除</button>
+          <button class="btn" type="button" id="clearDoneBtn">完了をまとめて削除</button>
+          <button class="btn" type="button" id="clearAllBtn">全削除</button>
         </div>
       </div>
 
-      <ul id="list"></ul>
-      <div id="empty" class="empty" style="display:none;">まだ何もありません。上から追加してね。</div>
+      <div class="listWrap">
+        <ul id="list"></ul>
+        <div id="empty" class="empty" style="display:none;">まだ何もありません。上から追加してね。</div>
+      </div>
 
-      <footer class="muted">
+      <footer>
         <div>編集：<span class="kbd">編集</span> → <span class="kbd">Enter</span> 保存 / <span class="kbd">Esc</span> キャンセル</div>
         <div id="statBottom"></div>
       </footer>
@@ -90,14 +356,16 @@
 
     const addForm = $("#addForm");
     const newTodo = $("#newTodo");
-    const addBtn = $("#addBtn");
     const listEl = $("#list");
     const emptyEl = $("#empty");
     const searchEl = $("#search");
     const clearDoneBtn = $("#clearDoneBtn");
     const clearAllBtn = $("#clearAllBtn");
-    const statTop = $("#statTop");
     const statBottom = $("#statBottom");
+
+    const tTotal = $("#tTotal");
+    const tActive = $("#tActive");
+    const tDone = $("#tDone");
 
     let filter = "all"; // all | active | done
     let search = "";
@@ -144,7 +412,10 @@
 
     function render() {
       const { total, done, active } = counts();
-      statTop.textContent = `全部 ${total} / 未完了 ${active} / 完了 ${done}`;
+      tTotal.textContent = total;
+      tActive.textContent = active;
+      tDone.textContent = done;
+
       statBottom.textContent = `フィルタ: ${filter} / 検索: ${normalize(search) ? "あり" : "なし"}`;
 
       clearDoneBtn.disabled = done === 0;
@@ -152,7 +423,6 @@
 
       const visible = getVisibleTodos();
       listEl.innerHTML = "";
-
       emptyEl.style.display = (visible.length === 0) ? "block" : "none";
 
       for (const t of visible) {
@@ -235,8 +505,6 @@
       const id = li.dataset.id;
       const t = todos.find(x => x.id === id);
       if (!t) return;
-
-      // すでに編集中なら何もしない
       if (li.dataset.editing === "1") return;
       li.dataset.editing = "1";
 
@@ -249,10 +517,8 @@
       input.value = t.text;
       input.setAttribute("aria-label", "ToDoを編集");
 
-      // 置き換え
       li.replaceChild(input, textDiv);
 
-      // actions を一時的に「保存/キャンセル」に
       actions.innerHTML = "";
       const saveBtn = document.createElement("button");
       saveBtn.type = "button";
@@ -280,17 +546,11 @@
           finishEdit(li, false);
         }
       });
-
-      input.addEventListener("blur", () => {
-        // クリックで保存ボタンを押す時の blur でも勝手に保存しないようにする
-        // ここでは何もしない（保存/キャンセルはボタン or Enter/Esc）
-      });
     }
 
     function finishEdit(li, commit) {
       const id = li.dataset.id;
       const input = li.querySelector(".editbox");
-      const actions = li.querySelector(".actions");
       const t = todos.find(x => x.id === id);
       if (!t) return;
 
@@ -302,12 +562,11 @@
           return;
         }
       }
-
       li.dataset.editing = "0";
       render();
     }
 
-    // --- events ---
+    // events
     addForm.addEventListener("submit", (e) => {
       e.preventDefault();
       addTodo(newTodo.value);
@@ -315,7 +574,6 @@
       newTodo.focus();
     });
 
-    // フィルタ切り替え
     document.querySelectorAll('[data-filter]').forEach(btn => {
       btn.addEventListener("click", () => {
         filter = btn.dataset.filter;
@@ -325,18 +583,15 @@
       });
     });
 
-    // 検索
     searchEl.addEventListener("input", () => {
       search = searchEl.value;
       render();
     });
 
-    // リスト内操作（イベント委譲）
     listEl.addEventListener("click", (e) => {
       const action = e.target?.dataset?.action;
       const li = e.target.closest("li");
       if (!li) return;
-
       const id = li.dataset.id;
 
       if (action === "toggle") toggleTodo(id);
@@ -346,12 +601,10 @@
       else if (action === "cancel") finishEdit(li, false);
     });
 
-    // テキストをダブルクリックで編集開始
     listEl.addEventListener("dblclick", (e) => {
       const li = e.target.closest("li");
       if (!li) return;
-      const isText = e.target.classList.contains("text");
-      if (isText) beginEdit(li);
+      if (e.target.classList.contains("text")) beginEdit(li);
     });
 
     clearDoneBtn.addEventListener("click", () => {
@@ -367,7 +620,6 @@
       render();
     });
 
-    // 初回描画
     render();
     newTodo.focus();
   </script>
